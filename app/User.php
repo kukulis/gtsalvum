@@ -7,6 +7,11 @@ use Illuminate\Notifications\Notifiable;
 
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
+/**
+ * Class User
+ * @package App
+ * @property $id int
+ */
 class User extends Authenticatable  implements JWTSubject
 {
     use Notifiable;

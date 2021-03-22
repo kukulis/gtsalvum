@@ -14,6 +14,10 @@ use League\Fractal\TransformerAbstract;
 
 class TaskTransformer extends TransformerAbstract
 {
+    /**
+     * @param Task $task
+     * @return array
+     */
     public function transform(Task $task) {
         return [
             'id'          => (int) $task->id,
@@ -26,4 +30,19 @@ class TaskTransformer extends TransformerAbstract
         ];
     }
 
+
+    /**
+     * @param array $data
+     * @return Task
+     */
+    public function toTask($data) {
+        $task = new Task();
+        $task->id                  = $data['id'] ?? null;
+        $task->name                = $data['Name'] ?? null;
+        $task->description         = $data['Description'] ?? null;
+        $task->type                = $data['Type'] ?? Task::TYPE_BASIC;
+        $task->status              = $data['Status'] ?? Task::STATUS_TODO;
+
+        return $task;
+    }
 }

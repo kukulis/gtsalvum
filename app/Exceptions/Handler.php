@@ -3,6 +3,8 @@
 namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -50,6 +52,18 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Throwable $exception)
     {
+        if (  is_a($exception, GtSalvumValidateException::class ) ) {
+            /** @var GtSalvumValidateException $validateException */
+            $validateException = $exception;
+            $response = new JsonResponse([
+                'Error'=>$validateException->getMessage(),
+                'Messages' => $validateException->getErrorMessages(),
+            ]);
+
+            $response->setStatusCode(Response::HTTP_BAD_REQUEST );
+            return $response;
+        }
+
         return parent::render($request, $exception);
     }
 }

@@ -44,7 +44,17 @@ class Task extends Model
         self::STATUS_HOLD,
     ];
 
+    const NAME_LENGTH = 255;
+    const DESCRIPTION_LENGTH = 4096;
+
+
     public function owner() {
         return $this->belongsTo(User::class, 'owner_id');
     }
+
+    protected  $guarded = array('id');
+
+    protected $fillable = [
+        'name', 'description', 'type', 'status', 'owner_id'
+    ];
 }
