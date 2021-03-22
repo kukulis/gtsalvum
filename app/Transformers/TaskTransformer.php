@@ -14,6 +14,11 @@ use League\Fractal\TransformerAbstract;
 
 class TaskTransformer extends TransformerAbstract
 {
+
+    protected $availableIncludes = [
+        'users'
+    ];
+
     /**
      * @param Task $task
      * @return array
@@ -28,6 +33,17 @@ class TaskTransformer extends TransformerAbstract
             'Created'     => $task->created_at, // may be not 100% correct
             'Updated'     => $task->updated_at,
         ];
+    }
+
+    public function includeUsers(Task $task) {
+        $usersCollection = $task->users()->get();
+        $users = [];
+        foreach ($usersCollection as $user ) {
+            if ( $user ) {
+                $users[] = $user;
+            }
+        }
+        return $this->collection( $users, new UserTransformer());
     }
 
 

@@ -11,6 +11,9 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
  * Class User
  * @package App
  * @property $id int
+ * @property $name string
+ * @property $email string
+ * @method static find($id)
  */
 class User extends Authenticatable  implements JWTSubject
 {
@@ -66,4 +69,12 @@ class User extends Authenticatable  implements JWTSubject
     public function tasks() {
         return $this->hasMany(Task::class, 'owner_id' );
     }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function assignedTasks() {
+        return $this->belongsToMany(Task::class)->using(TaskUser::class);
+    }
+
 }

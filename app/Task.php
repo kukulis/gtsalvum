@@ -48,14 +48,21 @@ class Task extends Model
     const NAME_LENGTH = 255;
     const DESCRIPTION_LENGTH = 4096;
 
-
-    public function owner() {
-        return $this->belongsTo(User::class, 'owner_id');
-    }
-
     protected  $guarded = array('id');
 
     protected $fillable = [
         'name', 'description', 'type', 'status', 'owner_id'
     ];
+
+    public function owner() {
+        return $this->belongsTo(User::class, 'owner_id');
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function users() {
+        return $this->belongsToMany(User::class)->using(TaskUser::class);
+    }
+
 }

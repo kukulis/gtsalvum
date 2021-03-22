@@ -20,13 +20,25 @@ use League\Fractal\Resource\Item;
 
 class TasksService
 {
+    const ATTACH_USER_ID='AttachUserId';
+    const DETACH_USER_ID='DetachUserId';
     /**
      * @param User $u
      * @return array
      */
     public function getMyTasks(User $u ) {
         $tasks = $u->tasks()->get();
-        $resource = new Collection($tasks, new TaskTransformer());
+        $assignedTasks= $u->assignedTasks()->get();
+
+        $tasksArr = [];
+        foreach ($tasks as $task ) {
+            $tasksArr[] = $task;
+        }
+        foreach ($assignedTasks as $task ) {
+            $tasksArr[] = $task;
+        }
+
+        $resource = new Collection($tasksArr, new TaskTransformer());
 
         $fractal = new Manager();
         $array = $fractal->createData($resource)->toArray();
@@ -86,8 +98,36 @@ class TasksService
             throw $exception;
         }
 
-        $task->save();
+        $assignUserId = null;
+        if ( array_key_exists(self::ATTACH_USER_ID, $data)) {
+            $assignUserId = $data[self::ATTACH_USER_ID];
+            // check if user exists
+            $assignUser = User::find($assignUserId);
+            if ( $assignUser == null ) {
+                throw new GtSalvumValidateException('There is no user with id ['.$assignUserId.'] to attach' );
+            }
+        }
 
+        $detachUserId = null;
+        if ( array_key_exists(self::DETACH_USER_ID, $data)) {
+            $detachUserId = $data[self::DETACH_USER_ID];
+            // check if user exists
+            $detachUser = User::find($detachUserId);
+            if ( $detachUser == null ) {
+                throw new GtSalvumValidateException('There is no user with id ['.$detachUser.'] to detach' );
+            }
+        }
+
+
+        if ($assignUserId != null ) {
+            $task->users()->attach($assignUserId);
+        }
+
+        if ( $detachUserId != null ) {
+            $task->users()->detach($detachUserId);
+        }
+
+        $task->save();
         return true;
     }
 
@@ -112,6 +152,7 @@ class TasksService
         $resource = new Item($task, new TaskTransformer());
 
         $fractal = new Manager();
+        $fractal->parseIncludes(['include'=>'users']);
         $data = $fractal->createData($resource)->toArray();
 
         return $data;
