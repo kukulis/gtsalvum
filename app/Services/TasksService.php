@@ -9,12 +9,14 @@
 namespace App\Services;
 
 
+use App\Exceptions\GtSalvumException;
 use App\Exceptions\GtSalvumValidateException;
 use App\Task;
 use App\Transformers\TaskTransformer;
 use App\User;
 use League\Fractal\Manager;
 use League\Fractal\Resource\Collection;
+use League\Fractal\Resource\Item;
 
 class TasksService
 {
@@ -34,12 +36,12 @@ class TasksService
     /**
      * @param array $data
      * @param User $u
-     * @return int
+     * @return int The id of the created task
      * @throws GtSalvumValidateException
      */
     public function createTask ( $data, User $u ) {
         $tt = new TaskTransformer();
-        $task = $tt->toTask($data);
+        $task = $tt->toTask($data, new Task());
         $task->owner_id = $u->id;
 
         $validateErrors = $this->validateTask($task);
@@ -51,6 +53,95 @@ class TasksService
 
         $task->save();
         return $task->id;
+    }
+
+    /**
+     * @param array $data
+     * @param int $id
+     * @param User $user
+     * @return bool
+     * @throws GtSalvumValidateException
+     */
+    public function updateTask($data, $id, User $user) {
+        /** @var Task $task */
+        $task = Task::find($id);
+        if ( $task == null ) {
+            throw new GtSalvumValidateException('There is no task with id '.$id);
+        }
+
+        if ( $task->owner_id != $user->id ) {
+            throw new GtSalvumValidateException('You are not allowed to update task '.$id);
+        }
+
+        $tt = new TaskTransformer();
+        $task = $tt->toTask($data, $task);
+
+        // setting the updated time the current moment
+        $task->updated_at = new \DateTime();
+
+        $validateErrors = $this->validateTask($task);
+        if ( count($validateErrors) > 0 ) {
+            $exception = new GtSalvumValidateException('Invalid task data');
+            $exception->setErrorMessages($validateErrors);
+            throw $exception;
+        }
+
+        $task->save();
+
+        return true;
+    }
+
+    /**
+     * @param int $id
+     * @param User $user
+     * @throws GtSalvumValidateException
+     * @return array
+     */
+    public function showTask ($id, User $user) {
+        /** @var Task $task */
+        $task = Task::find($id);
+        if ( $task == null ) {
+            throw new GtSalvumValidateException('There is no task with id '.$id);
+        }
+
+        if ( $task->owner_id != $user->id ) {
+            // may be there should be not a validation error
+            throw new GtSalvumValidateException('You are not allowed to view task '.$id);
+        }
+
+        $resource = new Item($task, new TaskTransformer());
+
+        $fractal = new Manager();
+        $data = $fractal->createData($resource)->toArray();
+
+        return $data;
+    }
+
+    /**
+     * @param $id
+     * @param User $user
+     * @return bool|null
+     * @throws GtSalvumValidateException
+     * @throws GtSalvumException
+     */
+    public function  deleteTask($id, User $user) {
+        /** @var Task $task */
+        $task = Task::find($id);
+        if ( $task == null ) {
+            throw new GtSalvumValidateException('There is no task with id '.$id);
+        }
+
+        if ( $task->owner_id != $user->id ) {
+            // may be there should be not a validation error
+            throw new GtSalvumValidateException('You are not allowed to delete task '.$id);
+        }
+
+        try {
+            $rez = $task->delete();
+        } catch ( \Exception $e ) {
+            throw new GtSalvumException('Error on deleting task' );
+        }
+        return $rez;
     }
 
     /**

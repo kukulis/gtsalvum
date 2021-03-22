@@ -32,16 +32,18 @@ class TaskTransformer extends TransformerAbstract
 
 
     /**
+     * Out of fractal scope function. Used to transform data from array to Task object.
+     * Here we expect to receive the same data as in transform function.
+     *
      * @param array $data
      * @return Task
      */
-    public function toTask($data) {
-        $task = new Task();
-        $task->id                  = $data['id'] ?? null;
-        $task->name                = $data['Name'] ?? null;
-        $task->description         = $data['Description'] ?? null;
-        $task->type                = $data['Type'] ?? Task::TYPE_BASIC;
-        $task->status              = $data['Status'] ?? Task::STATUS_TODO;
+    public function toTask($data, Task $task) {
+        $task->id                  = $data['id'] ?? $task->id;
+        $task->name                = $data['Name'] ?? $task->name;
+        $task->description         = $data['Description'] ?? $task->description;
+        $task->type                = $data['Type'] ?? $task->type;
+        $task->status              = $data['Status'] ?? $task->status;
 
         return $task;
     }

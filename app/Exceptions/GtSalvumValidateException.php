@@ -12,7 +12,7 @@ namespace App\Exceptions;
 class GtSalvumValidateException extends \Exception
 {
 
-    private $errorMessages;
+    private $errorMessages=[];
 
     /**
      * @return mixed

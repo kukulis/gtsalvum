@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\Model;
  *
  * @method static create($data)
  * @method static truncate
+ * @method static find($id)
  *
  */
 

@@ -5,6 +5,7 @@ namespace App\Exceptions;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -60,7 +61,17 @@ class Handler extends ExceptionHandler
                 'Messages' => $validateException->getErrorMessages(),
             ]);
 
+            Log::notice('Validation error: '.$exception->getMessage().'   Causes: '.join(",\n", $validateException->getErrorMessages()));
+
             $response->setStatusCode(Response::HTTP_BAD_REQUEST );
+            return $response;
+        }
+        elseif ( is_a($exception, GtSalvumException::class ) ) {
+            Log::error($exception->getMessage());
+            $response = new JsonResponse([
+                'Error'=>'Server error',
+            ]);
+            $response->setStatusCode(Response::HTTP_SERVICE_UNAVAILABLE);
             return $response;
         }
 

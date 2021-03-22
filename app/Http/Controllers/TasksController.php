@@ -45,16 +45,43 @@ class TasksController extends Controller
         return $rez;
     }
 
+    /**
+     * @param Request $request
+     * @param $id
+     * @return bool
+     * @throws \App\Exceptions\GtSalvumValidateException
+     */
     public function update(Request $request, $id) {
-        // TODO
+        /** @var User $user */
+        $user = auth()->user();
+        $data = $request->all();
+        $rez = $this->tasksService->updateTask($data, $id, $user);
+        return $rez;
     }
 
+    /**
+     * @param $id
+     * @return bool|null
+     * @throws \App\Exceptions\GtSalvumException
+     * @throws \App\Exceptions\GtSalvumValidateException
+     */
     public function delete($id) {
-        // TODO
+        /** @var User $user */
+        $user = auth()->user();
+        $rez = $this->tasksService->deleteTask($id,$user);
+        return $rez;
     }
 
+    /**
+     * @param int $id
+     * @return array
+     * @throws \App\Exceptions\GtSalvumValidateException
+     */
     public function show($id) {
-        // TODO
+        /** @var User $user */
+        $user = auth()->user();
+        $rez = $this->tasksService->showTask($id,$user);
+        return $rez;
     }
 
 
