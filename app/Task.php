@@ -7,9 +7,21 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * Class Task
  * @package App
+ *
+ * @property $id int
+ * @property $name string
+ * @property $description string
+ * @property $type string
+ * @property $status string
+ * @property $owner_id int
+ * @property $created_at string
+ * @property $updated_at string
+ *
  * @method static create($data)
  * @method static truncate
+ *
  */
+
 class Task extends Model
 {
     const TYPE_BASIC = 'basic';
@@ -32,9 +44,7 @@ class Task extends Model
         self::STATUS_HOLD,
     ];
 
-    //
     public function owner() {
         return $this->belongsTo(User::class, 'owner_id');
     }
-
 }

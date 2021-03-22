@@ -9,12 +9,19 @@
 namespace App\Services;
 
 
+use App\Transformers\TaskTransformer;
 use App\User;
+use League\Fractal\Manager;
+use League\Fractal\Resource\Collection;
 
 class TasksService
 {
     public function getMyTasks(User $u ) {
-        // TODO use fractal
-        return $u->tasks()->get();
+        $tasks = $u->tasks()->get();
+        $resource = new Collection($tasks, new TaskTransformer());
+
+        $fractal = new Manager();
+        $array = $fractal->createData($resource)->toArray();
+        return $array;
     }
 }
