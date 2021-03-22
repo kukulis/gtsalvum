@@ -21,7 +21,7 @@ class TasksController extends Controller
 
 
     /**
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @return array
      */
     public function index() {
 
