@@ -214,7 +214,7 @@ class MessagesService
             $viewLog->save();
         }
 
-        $message->viewDate = $viewLog->updated_at;
+        $message->viewDate = $viewLog->created_at;
 
 
         $resource = new Item($message, new MessageTransformer());
