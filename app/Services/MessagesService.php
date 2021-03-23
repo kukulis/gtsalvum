@@ -9,10 +9,12 @@
 namespace App\Services;
 
 
+use App\Exceptions\GtSalvumException;
 use App\Exceptions\GtSalvumValidateException;
 use App\Message;
 use App\Task;
 use App\Transformers\MessageTransformer;
+use App\Transformers\ViewLogTransformer;
 use App\User;
 use App\ViewLog;
 use League\Fractal\Manager;
@@ -145,8 +147,10 @@ class MessagesService
      * @param User $user
      * @return bool
      * @throws GtSalvumValidateException
+     * @throws GtSalvumException
      */
     public function deleteMessage($id, User $user ) {
+        /** @var Message $message */
         $message = Message::find($id);
         if ( $message == null ) {
             throw new GtSalvumValidateException('There is no message with id ['.$id.']' );
@@ -155,6 +159,12 @@ class MessagesService
         // validate permissions
         if ( $message->owner_id != $user->id ) {
             throw new GtSalvumValidateException('You are not allowed to update message ['.$id.'] because you are not an owner of it' );
+        }
+
+        try {
+            $message->delete();
+        } catch ( \Exception $e ) {
+            throw new GtSalvumException($e->getMessage() );
         }
 
         return true;
@@ -222,6 +232,58 @@ class MessagesService
         $fractal = new Manager();
         $array = $fractal->createData($resource)->toArray();
         return $array;
+    }
+
+
+    /**
+     * @param $id
+     * @param User $user
+     * @return array
+     * @throws GtSalvumValidateException
+     */
+    public function viewMessageLog($id, User $user) {
+        /** @var Message $message */
+        $message = Message::find($id);
+
+        if ( $message == null ) {
+            throw new GtSalvumValidateException('There is no message with id ['.$id.']' );
+        }
+
+        /** @var Task $task */
+        $task = Task::find( $message->task_id );
+
+        $allowView = false;
+
+        if ( $message->owner_id == $user->id ) {
+            $allowView = true;
+        }
+
+        if ( !$allowView ) {
+            if ($task->owner_id == $user->id) {
+                $allowView = true;
+            }
+        }
+
+        if ( !$allowView ) {
+            $foundUser = $this->taskRepository->findAssignedUser($task, $user->id );
+            if ( $foundUser != null ) {
+                $allowView = true;
+            }
+        }
+
+        if ( !$allowView ) {
+            throw new GtSalvumValidateException('You are not allowed to view logs of message ['.$id.']' );
+        }
+
+
+        $logs = $message->viewLogs()->get();
+
+        $resource = new Collection($logs, new ViewLogTransformer());
+
+        $fractal = new Manager();
+        $array = $fractal->createData($resource)->toArray();
+        return $array;
+
     }
 
     /**

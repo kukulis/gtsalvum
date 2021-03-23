@@ -20,11 +20,25 @@ use League\Fractal\Resource\Item;
 
 class TasksService
 {
+    /** @var TaskRepository */
+    private $taskRespository;
+
+
+
     /** @var string Parameter for attaching user to task */
     const ATTACH_USER_ID='AttachUserId';
 
     /** @var string Parameter for detaching user from task */
     const DETACH_USER_ID='DetachUserId';
+
+    /**
+     * TasksService constructor.
+     * @param TaskRepository $taskRespository
+     */
+    public function __construct(TaskRepository $taskRespository)
+    {
+        $this->taskRespository = $taskRespository;
+    }
 
     /**
      * @param User $u
@@ -67,7 +81,22 @@ class TasksService
             throw $exception;
         }
 
+        $assignUserId = null;
+        if ( array_key_exists(self::ATTACH_USER_ID, $data)) {
+            $assignUserId = $data[self::ATTACH_USER_ID];
+            // check if user exists
+            $assignUser = User::find($assignUserId);
+            if ( $assignUser == null ) {
+                throw new GtSalvumValidateException('There is no user with id ['.$assignUserId.'] to attach' );
+            }
+        }
+
         $task->save();
+
+        if ($assignUserId != null ) {
+            $task->users()->attach($assignUserId);
+        }
+
         return $task->id;
     }
 
@@ -85,8 +114,18 @@ class TasksService
             throw new GtSalvumValidateException('There is no task with id '.$id);
         }
 
-        if ( $task->owner_id != $user->id ) {
-            throw new GtSalvumValidateException('You are not allowed to update task '.$id);
+        $allowUpdate = false;
+
+        if ( $task->owner_id == $user->id ) {
+            $allowUpdate = true;
+        }
+
+        if ( count($data)==1 && array_key_exists('Status', $data) && $data['Status'] == Task::STATUS_CLOSED ) {
+            $allowUpdate = true;
+        }
+
+        if ( !$allowUpdate ) {
+            throw new GtSalvumValidateException('You are not allowed to update task ' . $id);
         }
 
         $tt = new TaskTransformer();
@@ -148,10 +187,27 @@ class TasksService
             throw new GtSalvumValidateException('There is no task with id '.$id);
         }
 
-        if ( $task->owner_id != $user->id ) {
-            // may be there should be not a validation error
-            throw new GtSalvumValidateException('You are not allowed to view task '.$id);
+        $allowView = false;
+
+        // allow to view task for owner
+        if ( $task->owner_id == $user->id ) {
+            $allowView = true;
         }
+
+        // allow to view task for assigned users
+        if ( !$allowView ) {
+            $foundUser = $this->taskRespository->findAssignedUser($task, $user->id);
+            if ( $foundUser != null ) {
+                $allowView = true;
+            }
+        }
+
+
+        if ( !$allowView) {
+            // may be there should be not a validation error
+            throw new GtSalvumValidateException('You are not allowed to view task ' . $id);
+        }
+
 
         $resource = new Item($task, new TaskTransformer());
 

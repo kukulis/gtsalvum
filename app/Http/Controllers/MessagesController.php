@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\GtSalvumException;
 use App\Services\MessagesService;
 use App\User;
 use Illuminate\Http\Request;
@@ -66,6 +67,7 @@ class MessagesController extends Controller
      * @param $id
      * @return bool
      * @throws \App\Exceptions\GtSalvumValidateException
+     * @throws GtSalvumException
      */
     public function delete( $id ) {
         /** @var User $user */
@@ -85,6 +87,19 @@ class MessagesController extends Controller
         $user = auth()->user();
 
         $rez = $this->messagesService->viewMessage($id, $user);
+        return $rez;
+    }
+
+    /**
+     * @param $id
+     * @return array
+     * @throws \App\Exceptions\GtSalvumValidateException
+     */
+    public function viewLog ($id ) {
+        /** @var User $user */
+        $user = auth()->user();
+
+        $rez = $this->messagesService->viewMessageLog($id, $user);
         return $rez;
     }
 }

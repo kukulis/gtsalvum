@@ -26,4 +26,8 @@ class Message extends Model
 
     // not stored in to db
     public $viewDate;
+
+    public function viewLogs() {
+        return $this->hasMany(ViewLog::class, 'message_id' );
+    }
 }

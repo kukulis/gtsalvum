@@ -42,6 +42,7 @@ Route::group(['middleware' => 'auth:api'], function() {
     Route::put('message/create', 'MessagesController@create' );
     Route::post('message/update/{id}', 'MessagesController@update' );
     Route::delete('message/delete/{id}', 'MessagesController@delete' );
+    Route::get('message/viewlog/{id}', 'MessagesController@viewLog' );
 });
 
 
