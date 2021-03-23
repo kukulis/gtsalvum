@@ -26,6 +26,7 @@ class MessageTransformer extends TransformerAbstract
             'task_id'     => $message->task_id,
             'Created'     => $message->created_at,
             'Updated'     => $message->updated_at,
+            'ViewDate'    => $message->viewDate??'',
         ];
     }
 

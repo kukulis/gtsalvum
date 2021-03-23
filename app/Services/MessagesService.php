@@ -14,7 +14,7 @@ use App\Message;
 use App\Task;
 use App\Transformers\MessageTransformer;
 use App\User;
-use Illuminate\Support\Facades\DB;
+use App\ViewLog;
 use League\Fractal\Manager;
 use League\Fractal\Resource\Collection;
 use League\Fractal\Resource\Item;
@@ -200,6 +200,22 @@ class MessagesService
         if ( !$canview) {
             throw new GtSalvumValidateException('You are not allowed to view message ['.$id.']');
         }
+
+        // log view event
+        $viewLogs = ViewLog::query()
+            ->where('user_id', '=', $user->id)
+            ->where('message_id', '=', $message->id )->get();
+        if ( count($viewLogs) > 0 ) {
+            $viewLog = $viewLogs->shift();
+        } else {
+            $viewLog = new ViewLog();
+            $viewLog->user_id = $user->id;
+            $viewLog->message_id = $message->id;
+            $viewLog->save();
+        }
+
+        $message->viewDate = $viewLog->updated_at;
+
 
         $resource = new Item($message, new MessageTransformer());
 

@@ -23,4 +23,7 @@ class Message extends Model
 {
     const SUBJECT_LENGTH = 255;
     const MESSAGE_LENGTH = 4096;
+
+    // not stored in to db
+    public $viewDate;
 }
