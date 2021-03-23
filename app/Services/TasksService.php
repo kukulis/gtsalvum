@@ -20,8 +20,12 @@ use League\Fractal\Resource\Item;
 
 class TasksService
 {
+    /** @var string Parameter for attaching user to task */
     const ATTACH_USER_ID='AttachUserId';
+
+    /** @var string Parameter for detaching user from task */
     const DETACH_USER_ID='DetachUserId';
+
     /**
      * @param User $u
      * @return array

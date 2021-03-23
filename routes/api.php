@@ -28,11 +28,20 @@ Route::group([
 
 
 Route::group(['middleware' => 'auth:api'], function() {
+
+    // tasks
     Route::get('tasks', 'TasksController@index');
     Route::put('task/create', 'TasksController@create');
     Route::post('task/update/{id}', 'TasksController@update');
     Route::get('task/show/{id}', 'TasksController@show');
     Route::delete('task/delete/{id}', 'TasksController@delete');
+
+    // messages
+    Route::get('messages', 'MessagesController@index' );
+    Route::get('message/view/{id}', 'MessagesController@view' );
+    Route::put('message/create', 'MessagesController@create' );
+    Route::post('message/update/{id}', 'MessagesController@update' );
+    Route::delete('message/delete/{id}', 'MessagesController@delete' );
 });
 
 

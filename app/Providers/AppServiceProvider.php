@@ -14,6 +14,8 @@ class AppServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->singleton(\App\Services\TasksService::class, \App\Services\TasksService::class );
+        $this->app->singleton(\App\Services\MessagesService::class, \App\Services\MessagesService::class );
+        $this->app->singleton(\App\Services\TaskRepository::class, \App\Services\TaskRepository::class );
     }
 
     /**
