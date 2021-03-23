@@ -35,6 +35,11 @@ class MessagesController extends Controller
         return $data;
     }
 
+    /**
+     * @param Request $request
+     * @return mixed
+     * @throws \App\Exceptions\GtSalvumValidateException
+     */
     public function create(Request $request) {
         /** @var User $user */
         $user = auth()->user();
@@ -43,6 +48,12 @@ class MessagesController extends Controller
         return $rez;
     }
 
+    /**
+     * @param Request $request
+     * @param $id
+     * @return bool
+     * @throws \App\Exceptions\GtSalvumValidateException
+     */
     public function update(Request $request, $id ) {
         /** @var User $user */
         $user = auth()->user();
@@ -51,6 +62,11 @@ class MessagesController extends Controller
         return $rez;
     }
 
+    /**
+     * @param $id
+     * @return bool
+     * @throws \App\Exceptions\GtSalvumValidateException
+     */
     public function delete( $id ) {
         /** @var User $user */
         $user = auth()->user();
@@ -59,6 +75,11 @@ class MessagesController extends Controller
         return $rez;
     }
 
+    /**
+     * @param $id
+     * @return array
+     * @throws \App\Exceptions\GtSalvumValidateException
+     */
     public function view( $id ) {
         /** @var User $user */
         $user = auth()->user();

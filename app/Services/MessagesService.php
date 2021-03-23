@@ -55,15 +55,38 @@ class MessagesService
         $message=$mt->toMessage($data, new Message());
         $message->owner_id = $user->id;
 
-        // TODO validate permissions
-
-
         // validate fields
         $errors = $this->validateMessage($message);
         if ( count($errors) > 0 ) {
             $exception = new GtSalvumValidateException('Invalid message data' );
             $exception->setErrorMessages($errors);
             throw $exception;
+        }
+
+        /** @var Task $task */
+        $task = Task::find( $message->task_id );
+        if ( $task == null ) {
+            throw new GtSalvumValidateException('Invalid task_id value given - no task with id ['.$message->task_id.']' );
+        }
+
+        // validate permissions
+        $canCreate = false;
+
+        // 1) owner of the task
+        if ( $task->owner_id == $user->id ) {
+            $canCreate = true;
+        }
+
+        // 2) assigned to the task
+        if ( !$canCreate ) {
+            $assignedUser = $this->taskRepository->findAssignedUser($task, $user->id);
+            if ($assignedUser != null) {
+                $canCreate = true;
+            }
+        }
+
+        if ( !$canCreate ) {
+            throw new GtSalvumValidateException('You are not allowed to create message for task ['.$message->task_id.']');
         }
 
         $message->save();
@@ -78,20 +101,30 @@ class MessagesService
      * @throws GtSalvumValidateException
      */
     public function updateMessage($data, $id, User $user) {
+
+        /** @var Message $message */
         $message = Message::find($id);
 
         if ( $message == null ) {
             throw new GtSalvumValidateException('There is no message with id ['.$id.']' );
         }
 
+        // validate permissions
+        if ( $message->owner_id != $user->id ) {
+            throw new GtSalvumValidateException('You are not allowed to update message ['.$id.'] because you are not an owner of it' );
+        }
 
-        // TODO validate permissions
 
         $mt = new MessageTransformer();
         $message=$mt->toMessage($data, $message);
 
-        // TODO validate fields
-
+        // validate fields
+        $errors = $this->validateMessage($message);
+        if ( count($errors) > 0 ) {
+            $exception = new GtSalvumValidateException('Invalid message data' );
+            $exception->setErrorMessages($errors);
+            throw $exception;
+        }
 
         $message->save();
         return true;
@@ -108,7 +141,11 @@ class MessagesService
         if ( $message == null ) {
             throw new GtSalvumValidateException('There is no message with id ['.$id.']' );
         }
-        // TODO validate permissions
+
+        // validate permissions
+        if ( $message->owner_id != $user->id ) {
+            throw new GtSalvumValidateException('You are not allowed to update message ['.$id.'] because you are not an owner of it' );
+        }
 
         return true;
     }
