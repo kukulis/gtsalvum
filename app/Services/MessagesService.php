@@ -14,6 +14,7 @@ use App\Message;
 use App\Task;
 use App\Transformers\MessageTransformer;
 use App\User;
+use Illuminate\Support\Facades\DB;
 use League\Fractal\Manager;
 use League\Fractal\Resource\Collection;
 use League\Fractal\Resource\Item;
@@ -23,21 +24,30 @@ class MessagesService
     /** @var TaskRepository */
     private $taskRepository;
 
+    /** @var MessagesRepository */
+    private $messagesRepository;
+
     /**
      * MessagesService constructor.
      * @param TaskRepository $taskRepository
+     * @param MessagesRepository $messagesRepository
      */
-    public function __construct(TaskRepository $taskRepository)
+    public function __construct(TaskRepository $taskRepository, MessagesRepository $messagesRepository)
     {
         $this->taskRepository = $taskRepository;
+        $this->messagesRepository = $messagesRepository;
     }
 
 
+    /**
+     * @param User $user
+     * @param int $offset
+     * @param int $limit
+     * @return array
+     */
     public function getAccessibleMessages(User $user, $offset, $limit ) {
-        $messages = Message::query()->orderBy('created_at')->offset($offset)->limit($limit)->get() ; // TODO owner conditions
-
+        $messages = $this->messagesRepository->getUserMessages($user->id, $offset, $limit );
         $resource = new Collection($messages, new MessageTransformer());
-
         $fractal = new Manager();
         $array = $fractal->createData($resource)->toArray();
         return $array;

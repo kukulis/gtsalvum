@@ -15,6 +15,9 @@ use Illuminate\Database\Eloquent\Model;
  * @property $created_at string|DateTime
  * @property $updated_at string|DateTime
  * @method static find($id)
+ * @method static create($data)
+ * @method static truncate
+ *
  */
 class Message extends Model
 {

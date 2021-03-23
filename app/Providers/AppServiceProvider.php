@@ -16,6 +16,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(\App\Services\TasksService::class, \App\Services\TasksService::class );
         $this->app->singleton(\App\Services\MessagesService::class, \App\Services\MessagesService::class );
         $this->app->singleton(\App\Services\TaskRepository::class, \App\Services\TaskRepository::class );
+        $this->app->singleton(\App\Services\MessagesRepository::class, \App\Services\MessagesRepository::class );
     }
 
     /**
