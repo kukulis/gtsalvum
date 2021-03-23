@@ -75,6 +75,13 @@ For all following endpoints you must set Header:
     
 The string after *Bearer* must be equal to the "access_token" value, received by login response.
 
+Also you may want to set header:
+    
+    Accept: text/json
+    
+With this you will receive HTTP 401 instead of redirecting to /login , when trying to access any endpoint without authentication.  
+ 
+
 ##### Tasks list
 
     GET http://localhost:8000/api/tasks
@@ -611,4 +618,5 @@ Http 200 response:
 * All the requested user stories working.
 * Instead of testing manually I could write tests, but this would be a next step.
 * Error code could be used instead of messages, to be able to translate in frontend.
-* May be should log all views of the message, not only first one.  
+* May be should log all views of the message, not only first one.
+   
